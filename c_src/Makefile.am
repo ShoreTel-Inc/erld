@@ -1,3 +1,4 @@
+bindir = $(ERLANG_INSTALL_LIB_DIR_erld)/priv/bin
 bin_PROGRAMS = erld
 
 erld_SOURCES = cnode.c debug.c erld.c log.c main.c pid.c slay.c util.c

@@ -23,7 +23,6 @@
 -export([start_link/0, erld_heartbeat_spec/0]).
 -export([send/0]).
 
--include("erlking.hrl").
 -define(HEARTBEAT_TIME, 7). %% Seconds
 -define(HEARTBEAT_WARN_TIME, 100000). %% microseconds after HEARTBEAT_TIME, set to 0.1 seconds
 
@@ -53,14 +52,14 @@ send() ->
 	end,
 	case timer:now_diff(now(), Then) - (?HEARTBEAT_TIME * 1000000) of
 		Late when Late >= ?HEARTBEAT_WARN_TIME ->
-			?warning("Heartbeat will be late (I over slept!)", "timeout was longer than expected", "heartbeat sent late", [], [{late_by_sec, Late / 1000000}, ?D(?HEARTBEAT_WARN_TIME)]);
+			io:fwrite("Heartbeat will be late (I over slept!) - timeout was longer than expected - heartbeat sent late (late by: ~p warn time: ~p", [{late_by_sec, Late / 1000000}, ?HEARTBEAT_WARN_TIME]);
 		_ ->
 			ok
 	end,
 	send().
 
 zombie() ->
-	?debug("heartbeats stopped.", []),
+	io:fwrite("heartbeats stopped.", []),
 	receive
 		start ->
 			send()
