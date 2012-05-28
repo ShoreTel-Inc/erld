@@ -3,9 +3,13 @@
 -module(erldapp).
 -behaviour(application).
 -behaviour(erld_app).
+-behaviour(supervisor).
 
 % application callbacks
--export([init/1, start/2, stop/1]).
+-export([start/2, stop/1]).
+
+% supervisor callback
+-export([init/1]).
 
 % erld_app callbacks
 -export([bake_cookie/0, stop/0]).
@@ -14,6 +18,7 @@
 start(_, _) ->
 	% Do your normal application startup here - if any of this fails, erld will exit
 	% to the console with an error code
+	{ok, AppPid} = supervisor:start_link({local, erldapp_sup}, ?MODULE, []),
 
 	% This call will detatch the erlang VM and return to the console with success (code 0).
 	erld:detach(),
@@ -35,3 +40,12 @@ bake_cookie() ->
 % You can add your own cleanup code as required
 stop() ->
 	application:stop(erldapp).
+
+% Top level supervisor
+init(_) ->
+	{ok, {{one_for_one, 5, 5}, [
+				% The heartbeat process allows erld to detect if this erlang VM dies or locks up
+				% or generally becomes unresponsive.
+				erld_heartbeat:erld_heartbeat_spec()
+				% Your other processes and nested supervisors go here
+			]}}.
