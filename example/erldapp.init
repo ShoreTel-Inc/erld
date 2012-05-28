@@ -1,0 +1,212 @@
+#! /bin/bash
+#
+# A sample init script for managing an erld application
+#
+
+
+NAME=erldapp
+DESC="My erld app"
+ERLD="/usr/local/bin/erld"
+ERLD_LOG="/var/log/erldapp/erld.log"
+ERL="/usr/lib/erlang/bin/erl +Ktrue +B -noinput"
+ERL_CONFIG="/etc/erldapp/erld-sys"
+ERL_BOOT="/usr/lib/erlang/lib/erldapp-1.1.1/ebin/erldapp"
+COOKIE_FILE="/etc/erldapp/cookie"
+NODE="erldapp"
+TMPNODE="$NODE-tmp"
+FULLNODE="'$NODE@`hostname -f`'"
+TIMEOUT=60 # Wait for one minute for the app to come up
+HEARTBEAT=22 # erld heartbeat timeout, seconds
+HEARTBEAT_WARN=8 # erld slow heartbeat warning, seconds
+GRACE=10 # erld kill grace period, seconds
+RESTART_COUNT=3 # erld restart limit (number of successive "quick" crashes before giving up)
+RESTART_INTERVAL=1200 # erld restart interval (time that's considered a "quick" crash) (1200 seconds = 20 minutes)
+PIDFILE=/var/run/$NAME.pid
+LOCKDIR=/var/lock
+LOCKFILE=$LOCKDIR/$NAME
+
+% This module:function will be called when erld receives a SIGHUP
+ROTATION_MODULE=erld_logger 
+ROTATION_FUNCTION=rotate_logs
+
+RETVAL=0
+# Set to -d to enable debugging of erld.
+ERLD_DEBUG=""
+
+ERL_COMMAND="$ERL -config $ERL_CONFIG -name $NODE -boot $ERL_BOOT -shutdown_time 5000 +W w"
+ERLD_COMMAND="$ERLD $ERLD_DEBUG -c $COOKIE_FILE -l $ERLD_LOG -p $PIDFILE -t $HEARTBEAT -T $HEARTBEAT_WARN -g $GRACE -r $RESTART_COUNT -i $RESTART_INTERVAL -M $ROTATION_MODULE -F $ROTATION_FUNCTION -- $ERL_COMMAND"
+
+checkroot() {
+	if [ `id -u` -ne "0" ]; then
+		echo "Only the super user can successfully run this command."
+		exit 1
+	fi
+}
+
+success() {
+	echo "OK"
+	RETVAL=0
+}
+
+failure() {
+	echo "FAILED (check erld.log for errors)"
+	RETVAL=1
+}
+
+waitstop() {
+	pid=$1
+	echo -n "(wait for $pid:"
+
+	count=0
+	ps -p $pid > /dev/null
+	dead=$?
+	while [[ "$dead" -eq "0" && "$count" -lt "10" ]]; do
+		echo -n '.'
+		sleep 1
+		(( count++ ))
+		ps -p $pid > /dev/null
+		dead=$?
+	done
+	echo -n ') '
+	# If it didn't shut down nicely, we get nasty
+	if [ "$dead" -eq "0" ]; then
+		echo "WARNING: Failed to gracefully shut down erldapp node.  Resorting to killing it harshly."
+		kill -9 $pid
+	fi
+}
+
+# start and stop the elvis_tftp erlang system
+
+test -x $START || exit 0
+
+start() {
+	checkroot
+	# Make sure epmd is running. There's no harm in running it several times and it doesn't
+	# need to be stopped so just run it simply here every time.
+	epmd -daemon
+	bake_cookie
+	echo -n "Starting the $DESC server... "
+	$ERLD_COMMAND
+	if [ "$?" -eq "0" ]; then
+		success
+		[ -d $LOCKDIR ] || mkdir -p $LOCKDIR
+		touch $LOCKFILE
+	else
+		failure
+	fi
+}
+
+bake_cookie() {
+	touch $COOKIE_FILE
+	chown root $COOKIE_FILE
+	chmod o= $COOKIE_FILE
+	chmod g=r $COOKIE_FILE
+	$ERL -noshell -eval "io:fwrite(\"~s\", [erldapp:bake_cookie()])." -s init stop > $COOKIE_FILE
+}
+
+stop() {
+	checkroot
+	echo -n "Stopping the $DESC server "
+	if [ -r $PIDFILE ]; then
+		pid=`cat $PIDFILE`
+		$ERL -name $TMPNODE -eval "erld_remote:stop(\"elvis\", erldapp)."
+		if [ $? ] ; then
+			waitstop $pid
+			rm -f $LOCKFILE
+			success
+		else
+			failure
+		fi
+
+	else
+		echo -n "(no pid file) "
+		failure
+	fi
+}
+
+condrestart() {
+	checkroot
+	[ -e $LOCKFILE ] && stop && start
+}
+
+condstart() {
+	checkroot
+	[ -e $LOCKFILE ] || start
+}
+
+condstop() {
+	checkroot
+	[ -e $LOCKFILE ] && stop
+}
+
+# Status result codes as defined by LSB
+status() {
+	echo -n "The $DESC server is "
+	if [ -e $LOCKFILE ]; then
+		if [ -e $PIDFILE ]; then
+			pid=`cat $PIDFILE`
+			if ps -p $pid > /dev/null; then
+				# running and pid file exists
+				echo "running"
+				RETVAL=0
+			else
+				# not running but pid file exists
+				echo "dead but $LOCKFILE and $PIDFILE exist"
+				RETVAL=1
+			fi
+		else
+			# not running, no pid file
+			echo "dead but $LOCKFILE file eixsts"
+			RETVAL=2
+		fi
+	else
+		# no lock file
+		echo "not running"
+		RETVAL=3
+	fi
+}
+
+show()
+{
+	echo "The server is started in the following environmnent:"
+	echo "(HOME is already set when running interactively.)"
+	echo "export HOME='$HOME'"
+	echo "The command used to start the server is:"
+	echo "$ERLD_COMMAND" | sed 's/\"/\\&/g'
+	echo "The command run by erld is:"
+	echo "$ERL_COMMAND" | sed 's/\"/\\&/g'
+	echo "To run without overriding the error logger remove the \"-config\" option."
+}
+
+case "$1" in
+  start)
+  	start
+	;;
+  stop)
+   stop
+	;;
+  restart)
+   stop
+	start
+	;;
+  condstop)
+   condstop
+	;;
+  condstart)
+   condstart
+	;;
+  condrestart)
+   condrestart
+	;;
+  status)
+   status
+	;;
+  show)
+   show
+	;;
+  *)
+	echo "Usage: /etc/init.d/erldapp {start|stop|restart|condrestart|condstop|show|status}"
+	exit 1
+esac
+
+exit $RETVAL
