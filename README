@@ -1,0 +1,8 @@
+To build and install from a clean checkout:
+
+	aclocal
+	autoconf -f
+	automake -a
+	./configure
+	make
+	sudo make install
