@@ -21,7 +21,6 @@
 #include <sys/types.h> /* */
 #include <signal.h> /* kill */
 #include <unistd.h> /* sleep */
-
 #include "debug.h"
 #include "options.h"
 
@@ -122,7 +121,7 @@ void slay_impl(pid_t *pids, int n, int sig, pid_t pid, int include_children) {
 	DEBUG_V("slay %d with signal %d", pid, sig);
 	kill(pid, sig);
 	for (i = 0; i < n; i++) {
-		proc_bsdinfo info;
+		struct proc_bsdinfo info;
 		CHECK(proc_pidinfo(pids[i], PROC_PIDTBSDINFO, 0, &info, sizeof info));
 		if (info.pbi_pid == pid) {
 			if (info.pbi_status == SZOMB) {
