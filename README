@@ -1,14 +1,12 @@
-See the github wiki at https://github.com/ShoreTel-Inc/erld/wiki for documentation. 
+See the github wiki at https://github.com/ShoreTel-Inc/erld/wiki for documentation.
 You can also check out the example code under the 'example' directory and run 'erld -h' for an explanation of parameters.
 
 To build and install from a clean checkout:
 
-	aclocal
-	autoconf -f
-	automake -a
-	./configure
-	make
-	sudo make install
+        ./bootstrap.sh
+        ./configure
+        make
+        sudo make install
 
 REQUIREMENTS:
 erld doesn't require much to build. In addition to Erlang, you will need libproc and its development files (headers etc)
