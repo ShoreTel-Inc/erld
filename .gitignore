@@ -1,3 +1,21 @@
+# General Ignorable Generated things
+Makefile
+Makefile.in
+aclocal.m4
+autom4te.*
+c_src/.deps/*
+c_src/Makefile
+c_src/Makefile.in
+compile
+config.log
+config.status
+configure
+depcomp
+install-sh
+missing
+src/Makefile
+src/Makefile.in
+
 # Compiled Object files
 *.slo
 *.lo
