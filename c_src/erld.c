@@ -146,7 +146,7 @@ int erld_main(char *cookie, char *const argv[]) {
 
 	syslog(LOG_INFO, "start");
 	DEBUG_V("restart_limit: %d, restart_interval: %ld.%06ld"
-	, restart_limit, restart_interval.tv_sec, restart_interval.tv_usec);
+	, restart_limit, restart_interval.tv_sec, (long) restart_interval.tv_usec);
 
 	do {
 		gettimeofday(&last_start, 0);
@@ -163,7 +163,7 @@ int erld_main(char *cookie, char *const argv[]) {
 				if (timercmp(&dt, &restart_interval, <=)) {
 					restarts++;
 					LOG_V("Run time %ld.%06ld sec <= interval %ld.%06ld, incrementing restart count to %d (limit %d)."
-					, dt.tv_sec, dt.tv_usec, restart_interval.tv_sec, restart_interval.tv_usec
+					, dt.tv_sec, (long) dt.tv_usec, restart_interval.tv_sec, (long) restart_interval.tv_usec
 					, restarts, restart_limit);
 					if (restarts >= restart_limit) {
 						syslog(LOG_WARNING, "Restart limit reached, bailing out.");
@@ -173,7 +173,7 @@ int erld_main(char *cookie, char *const argv[]) {
 				}
 				else {
 					LOG_V("Run time %ld.%06ld sec > interval %ld.%06ld sec, clearing restart count."
-					, dt.tv_sec, dt.tv_usec, restart_interval.tv_sec, restart_interval.tv_usec);
+					, dt.tv_sec, (long) dt.tv_usec, restart_interval.tv_sec, (long) restart_interval.tv_usec);
 					restarts = 0;
 				}
 			}
@@ -251,13 +251,13 @@ int erld_main_loop(char *const argv[], int epmd_sock, int listen_sock, ei_cnode 
 			timersub(&now, &last_hb, &dt);
 			timersub(&heartbeat_timeout, &dt, &tv);
 			DEBUG_V("last heartbeat was %ld.%06ld seconds ago, timeout in %ld.%06ld seconds."
-			, dt.tv_sec, dt.tv_usec, tv.tv_sec, tv.tv_usec);
+			, dt.tv_sec, (long) dt.tv_usec, tv.tv_sec, (long)tv.tv_usec);
 			if (timercmp(&tv, &soon, <)) {
 				/* More paranoia: Never have select timeout immediately because if something
 				   is wrong it may lead to hard-looping at 100% CPU. Just set the timeout
 				   to something fairly small instead. */
 				DEBUG_V("heartbeat timeout very soon, setting timeout to %ld.%06ld seconds."
-				, soon.tv_sec, soon.tv_usec);
+				, soon.tv_sec, (long) soon.tv_usec);
 				timerclear(&tv);
 				tv.tv_sec = 1;
 			}
@@ -389,14 +389,14 @@ int erld_main_loop(char *const argv[], int epmd_sock, int listen_sock, ei_cnode 
 							timersub(&now, &last_hb, &dt);
 							if (timerisset(&heartbeat_warn) && timercmp(&dt, &heartbeat_warn, >=)) {
 								LOG_V("THUMP: WARNING heartbeat was late: %ld.%06ld seconds (warn at %ld.%06ld, timeout at %ld.%06ld)."
-								, dt.tv_sec, dt.tv_usec, heartbeat_warn.tv_sec, heartbeat_warn.tv_usec
-								, heartbeat_timeout.tv_sec, heartbeat_timeout.tv_usec);
-								syslog(LOG_WARNING, "%s late heartbeat (%ld.%06ld seconds).", NAME, dt.tv_sec, dt.tv_usec);
+								, dt.tv_sec, (long) dt.tv_usec, heartbeat_warn.tv_sec, (long) heartbeat_warn.tv_usec
+								, heartbeat_timeout.tv_sec, (long) heartbeat_timeout.tv_usec);
+								syslog(LOG_WARNING, "%s late heartbeat (%ld.%06ld seconds).", NAME, dt.tv_sec, (long) dt.tv_usec);
 							}
 							else {
 								DEBUG_V("THUMP: heartbeat took %ld.%06ld seconds (timeout at %ld.%06ld)."
-								, dt.tv_sec, dt.tv_usec
-								, heartbeat_timeout.tv_sec, heartbeat_timeout.tv_usec);
+								, dt.tv_sec, (long) dt.tv_usec
+								, heartbeat_timeout.tv_sec, (long) heartbeat_timeout.tv_usec);
 							}
 							last_hb = now;
 						}
@@ -424,7 +424,7 @@ int erld_main_loop(char *const argv[], int epmd_sock, int listen_sock, ei_cnode 
 			timersub(&now, &last_hb, &dt);
 			if (timercmp(&dt, &heartbeat_timeout, >=)) {
 				LOG_V("heartbeat timeout (%ld.%06ld seconds), killing and restarting."
-				, dt.tv_sec, dt.tv_usec);
+				, dt.tv_sec, (long) dt.tv_usec);
 				syslog(LOG_WARNING, "%s heartbeat timeout, killing and restarting.", NAME);
 				slay(erl_pid);
 				restart = 1;
