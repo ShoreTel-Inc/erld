@@ -1,2 +1,2 @@
 #! /bin/sh
-aclocal && autoconf -f  && automake -a
+aclocal && autoconf -f  && automake --foreign -a
