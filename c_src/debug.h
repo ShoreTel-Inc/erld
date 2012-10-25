@@ -34,9 +34,9 @@ extern int ei_tracelevel; // Hook into the ei library debug
 #define DEBUG(FMT) debug(__FUNCTION__, FMT)
 #define DEBUG_V(FMT, ...) debug(__FUNCTION__, FMT, __VA_ARGS__)
 
-#define LOG(FMT) log(1, 1, __FUNCTION__, FMT)
-#define LOG_V(FMT, ...) log(1, 1, __FUNCTION__, FMT, __VA_ARGS__)
+#define LOG(FMT) log_message(1, 1, __FUNCTION__, FMT)
+#define LOG_V(FMT, ...) log_message(1, 1, __FUNCTION__, FMT, __VA_ARGS__)
 
 void fatal_error(const char *file, int line, int e, const char *fmt, ...) __attribute__((format(printf, 4, 5)));
-void log(int prefix, int suffix, const char *fun, const char *fmt, ...) __attribute__((format(printf, 4, 5)));
+void log_message(int prefix, int suffix, const char *fun, const char *fmt, ...) __attribute__((format(printf, 4, 5)));
 void debug(const char *fun, const char *fmt, ...) __attribute__((format(printf, 2, 3)));
