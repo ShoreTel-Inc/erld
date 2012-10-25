@@ -288,13 +288,13 @@ int erld_main_loop(char *const argv[], int epmd_sock, int listen_sock, ei_cnode 
 					while ((q = strstr(p, "\r\n"))) {
 						/* q points to the end of a complete line */
 						*q = 0; /* null terminate this line */
-						log(at_eol, 1, "erl", "%s", p);
+						log_message(at_eol, 1, "erl", "%s", p);
 						at_eol = 1;
 						p = q + 2; /* 2 == length of separator, \r\n */
 					}
 					if (strlen(p)) {
 						/* there was an unterminated line at the end */
-						log(at_eol, 0, "erl", "%s", p);
+						log_message(at_eol, 0, "erl", "%s", p);
 						at_eol = 0;
 					}
 				}
@@ -409,7 +409,7 @@ int erld_main_loop(char *const argv[], int epmd_sock, int listen_sock, ei_cnode 
 						 * fragments of a long line can be written a piece at a time (with
 						 * each piece being flushed), but the copy written to the log file
 						 * has an EOL appended to maintain the log file format. */
-						log(1, 1, "stdout", "%s", ret_str);
+						log_message(1, 1, "stdout", "%s", ret_str);
 						if (!detached) {
 							printf("%s", ret_str);
 							fflush(stdout);
