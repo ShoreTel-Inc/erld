@@ -87,7 +87,7 @@ void debug(const char *fun, const char *fmt, ...) {
 
 }
 
-void log(int prefix, int suffix, const char *fun, const char *fmt, ...) {
+void log_message(int prefix, int suffix, const char *fun, const char *fmt, ...) {
 	va_list ap;
 
 	va_start(ap, fmt);
