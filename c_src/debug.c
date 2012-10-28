@@ -107,7 +107,7 @@ void log_impl(int prefix, int suffix, const char *fun, const char *fmt, va_list 
 	if (prefix)
 		msg2 = alloc_printf("%04d-%02d-%02d %02d:%02d:%02d.%06ld %d %s: %s%s"
 		, tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday
-		, tm->tm_hour, tm->tm_min, tm->tm_sec, now.tv_usec
+		, tm->tm_hour, tm->tm_min, tm->tm_sec, (long) now.tv_usec
 		, getpid(), fun, msg1, (suffix ? "\n" : ""));
 	else
 		msg2 = alloc_printf("%s%s", msg1, (suffix ? "\n" : ""));
