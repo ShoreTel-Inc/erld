@@ -26,6 +26,9 @@
 #include <stdlib.h> /* malloc */
 #include <string.h> /* memcpy, strerror */
 #include <errno.h> /* errno */
+#include <sys/socket.h> /* getpeername, inet_ntoa */
+#include <netinet/in.h> /* inet_ntoa */
+#include <arpa/inet.h> /* inet_ntoa */
 
 #include "global.h"
 #include "cnode.h"
@@ -89,18 +92,25 @@ int start_cnode(const char *cookie_file, ei_cnode *ec, int *epmd_sock, int *list
 }
 
 int accept_erlang_connection(ei_cnode *ec, int listen_sock, ErlConnect *onode) {
-	int con;
+	int con, named;
+	struct sockaddr_in addr;
+	socklen_t len;
 
+	/* Unfortunately we can't print out the address of the connection
+	 * attempt if it doesn't succeed, because we don't have the socket
+	 * at that stage: the accept() and more happen together inside ei_accept. */
 	DEBUG("accepting connection on erlang socket");
 	do {
 		con = ei_accept(ec, listen_sock, onode);
 	} while ((con == ERL_ERROR) && (erl_errno == EINTR));
 	if (con == ERL_ERROR) {
-		erl_err_sys("ei_accept failed");
+		LOG_V("ei_accept failed (%d): %s", erl_errno, strerror(erl_errno));
 		return -1;
 	}
-	else
-		DEBUG_V("connection from node \"%s\"", onode->nodename);
+	len = sizeof addr;
+	named = !getpeername(con, (struct sockaddr *)&addr, &len);
+	LOG_V("connection from node %s:%d \"%s\""
+	, (named ? inet_ntoa(addr.sin_addr) : "?"), (named ? ntohs(addr.sin_port) : -1), onode->nodename);
 	return con;
 }
 
@@ -167,8 +177,7 @@ int cnode_read(int fd, char **ret_str) {
 	result = ei_receive_msg_tmo(fd, &msg, &x, 1);
 
 	if (result < 0) {
-		if (debug_flag)
-			erl_err_ret("ei_receive_msg_tmo failed");
+		LOG_V("ei_receive_msg_tmo failed (%d): %s", erl_errno, strerror(erl_errno));
 		switch (erl_errno) {
 			case ETIMEDOUT:
 				DEBUG("ei_receive_msg_tmo: timed out.");
@@ -181,7 +190,7 @@ int cnode_read(int fd, char **ret_str) {
 				rv = CNODE_ERROR;
 				break;
 			case EIO:
-				DEBUG_V("ei_receive_msg_tmo: IO error (%d: %s)", errno, strerror(errno));
+				LOG_V("ei_receive_msg_tmo: IO error (%d: %s)", errno, strerror(errno));
 				if (errno != EAGAIN)
 					rv = CNODE_ERROR;
 				break;

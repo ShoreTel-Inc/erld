@@ -202,7 +202,7 @@ int erld_main(char *cookie, char *const argv[]) {
 }
 
 int erld_main_loop(char *const argv[], int epmd_sock, int listen_sock, ei_cnode *ec, int sig_pipe_fd) {
-	int erlang_sock = -1;
+	int erlang_sock = -1, tmp_erlang_sock;
 	int m_pty, max_fd, n, l, i;
 	char buf[BUF_LEN];
 	ErlConnect onode;
@@ -322,7 +322,7 @@ int erld_main_loop(char *const argv[], int epmd_sock, int listen_sock, ei_cnode 
 								, (char*)(log_rotation_module ? log_rotation_module : DEFAULT_LOG_ROTATION_MODULE)
 								, (char*)(log_rotation_function ? log_rotation_function : DEFAULT_LOG_ROTATION_FUNCTION)
 								, args.buff, args.index, &result) == -1)
-									DEBUG_V("Error %d when trying to rotate erlking logs", erl_errno);
+									LOG_V("Error %d when trying to rotate erlking logs: %s", erl_errno, strerror(errno));
 								ei_x_free(&args);
 								ei_x_free(&result);
 							}
@@ -339,14 +339,21 @@ int erld_main_loop(char *const argv[], int epmd_sock, int listen_sock, ei_cnode 
 				}
 			}
 			if ((listen_sock >= 0) && FD_ISSET(listen_sock, &r_fds)) {
-				if (erlang_sock != -1) {
-					DEBUG("closing existing erlang connection.");
-					close(erlang_sock);
+				if ((tmp_erlang_sock = accept_erlang_connection(ec, listen_sock, &onode)) == -1) {
+					if (erlang_sock == -1) {
+						LOG("Failed to accept first connection from erl node: exit.");
+						break; // couldn't connect and no previous one to fall back to... bail out.
+					}
+					else {
+						LOG("Failed to accept a new connection from the erl node, falling back to previous connection.");
+					}
 				}
-				// Retry connection once, and exit if it fails.
-				if ((erlang_sock = accept_erlang_connection(ec, listen_sock, &onode)) == -1) {
-					DEBUG("Lost connection to erl node.");
-					break;
+				else {
+					if (erlang_sock >= 0) {
+						LOG_V("closing previous erlang connection on fd %d.", erlang_sock);
+						close(erlang_sock);
+					}
+					erlang_sock = tmp_erlang_sock;
 				}
 			}
 			if ((erlang_sock >= 0) && FD_ISSET(erlang_sock, &r_fds)) {
