@@ -110,7 +110,7 @@ int erld_main(char *cookie, char *const argv[]) {
 			sleep(1);
 			continue;
 		}
-		fatal_error(__RELFILE__, __LINE__, errno, "gethostbyname(%s) h_errno %d", hostname, h_errno);
+		fatal_error(__RELFILE__, __LINE__, errno, "Hostname lookup of %s failed! h_errno %d", hostname, h_errno);
 	} while (1);
 	DEBUG_V("FQDN %s", host->h_name);
 
