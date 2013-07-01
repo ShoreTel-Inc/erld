@@ -20,7 +20,7 @@ start(_, _) ->
 	% to the console with an error code
 	{ok, AppPid} = supervisor:start_link({local, erldapp_sup}, ?MODULE, []),
 
-	% This call will detatch the erlang VM and return to the console with success (code 0).
+	% This call will detach the erlang VM and return to the console with success (code 0).
 	erld:detach(),
 
 	% Do any startup that you want to fail in daemon mode here (that's probably none)
@@ -31,7 +31,7 @@ start(_, _) ->
 stop(_) ->
 	ok.
 
-% This function reutrns the cookie that this node will use. If you want some magic, randomly
+% This function returns the cookie that this node will use. If you want some magic, randomly
 % generated cookie to be used for each iteration, or something else, generate it here.
 bake_cookie() ->
 	'superSecretCookie'.
