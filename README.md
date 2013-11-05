@@ -21,7 +21,13 @@ need libproc and its development files (headers etc) and that should
 be all (aside from standard stuff like a compiler and autotools which
 pretty much any developer will already have installed).
 
+For Debian-derived systems, the development packages required are
+libprocps-dev and erlang-dev (or esl-erlang if you're using Erlang
+Solutions' packages).
+
 There are no specific version restrictions on Erlang that we're aware
 of - we've been running this code since R13 and are still using it
-without signficant modification on R15. If you do encounter a problem
+without signficant modification on R16. If you do encounter a problem
 with a particular version, please let us know.
+
+
