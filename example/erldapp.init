@@ -45,7 +45,7 @@ PIDFILE=/var/run/$NAME.pid
 LOCKDIR=/var/lock
 LOCKFILE=$LOCKDIR/$NAME
 
-% This module:function will be called when erld receives a SIGHUP
+# This module:function will be called when erld receives a SIGHUP
 ROTATION_MODULE=erld_logger 
 ROTATION_FUNCTION=rotate_logs
 
