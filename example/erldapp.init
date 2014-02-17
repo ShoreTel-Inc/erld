@@ -90,7 +90,7 @@ waitstop() {
 	echo -n ') '
 	# If it didn't shut down nicely, we get nasty
 	if [ "$dead" -eq "0" ]; then
-		echo "WARNING: Failed to gracefully shut down erldapp node.  Resorting to killing it harshly."
+		echo -e "\nWARNING: Failed to gracefully shut down erldapp node.  Resorting to killing it harshly."
 		kill -9 $pid
 	fi
 }
