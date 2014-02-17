@@ -133,6 +133,7 @@ stop() {
 		if [ $? ] ; then
 			waitstop $pid
 			rm -f $LOCKFILE
+			rm -f $PIDFILE
 			success
 		else
 			failure
