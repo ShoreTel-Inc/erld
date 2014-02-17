@@ -126,8 +126,8 @@ bake_cookie() {
 
 stop() {
 	checkroot
-	echo -n "Stopping the $DESC server "
 	if [ -r $PIDFILE ]; then
+		echo -n "Stopping the $DESC server "
 		pid=`cat $PIDFILE`
 		$ERL -name $TMPNODE -eval "erld_remote:stop(\"elvis\", erldapp)."
 		if [ $? ] ; then
@@ -140,8 +140,7 @@ stop() {
 		fi
 
 	else
-		echo -n "(no pid file) "
-		failure
+		echo "$DESC already stopped"
 	fi
 }
 
