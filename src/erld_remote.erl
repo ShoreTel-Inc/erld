@@ -65,7 +65,7 @@ remote(NodeName, CookieModule, Module, Function, Arguments) ->
 stop(Node, CookieModule) ->
 	try
 		% 123 is the erld magic number to indicate a clean exit requested from the init script
-		shutdown = remote(Node, CookieModule, init, stop, [123])
+		ok = remote(Node, CookieModule, init, stop, [123])
 	catch
 		_:_ -> erlang:halt(1)
 	end,
