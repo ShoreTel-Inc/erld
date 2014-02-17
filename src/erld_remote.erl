@@ -42,11 +42,15 @@ remote(NodeName, CookieModule, Module, Function, Arguments) ->
 		pong ->
 			try
 				case rpc:call(Node, Module, Function, Arguments) of
-					{'EXIT', {shutdown, _}} -> io:fwrite("[shutdown]\n"), ok;
-					% The erlang:halt call will generate this return:
-					{badrpc, nodedown} -> shutdown;
-					ok -> ok
-					% All other cases are failures and will be caught below
+					{'EXIT', {shutdown, _}} ->
+						io:fwrite("[shutdown]\n"),
+						ok;
+					{badrpc, nodedown} ->
+						% The erlang:halt call will generate this return value
+						shutdown;
+					ok ->
+						% All other cases are failures and will be caught here
+						ok
 				end
 			catch
 				A:B ->
