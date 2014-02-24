@@ -20,6 +20,8 @@ src/Makefile.in
 *.slo
 *.lo
 *.o
+*.beam
+c_src/erld
 
 # Compiled Dynamic libraries
 *.so
@@ -28,3 +30,8 @@ src/Makefile.in
 *.lai
 *.la
 *.a
+
+# Various temp files
+*~
+*.swp
+*.orig
