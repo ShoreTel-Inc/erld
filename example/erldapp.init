@@ -128,7 +128,7 @@ stop() {
 		echo -n "Stopping the $DESC server "
 		pid=`cat $PIDFILE`
 		$ERL -name $TMPNODE -eval "erld_remote:stop(\"$NAME\", erldapp)."
-		if [ $? ] ; then
+		if [ "$?" -eq "0" ] ; then
 			waitstop $pid
 			rm -f $LOCKFILE
 			rm -f $PIDFILE
