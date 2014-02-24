@@ -42,11 +42,15 @@ remote(NodeName, CookieModule, Module, Function, Arguments) ->
 		pong ->
 			try
 				case rpc:call(Node, Module, Function, Arguments) of
-					{'EXIT', {shutdown, _}} -> io:fwrite("[shutdown]\n"), ok;
-					% The erlang:halt call will generate this return:
-					{badrpc, nodedown} -> shutdown;
-					ok -> ok
-					% All other cases are failures and will be caught below
+					{'EXIT', {shutdown, _}} ->
+						io:fwrite("[shutdown]\n"),
+						ok;
+					{badrpc, nodedown} ->
+						% The erlang:halt call will generate this return value
+						shutdown;
+					ok ->
+						% All other cases are failures and will be caught here
+						ok
 				end
 			catch
 				A:B ->
@@ -61,7 +65,7 @@ remote(NodeName, CookieModule, Module, Function, Arguments) ->
 stop(Node, CookieModule) ->
 	try
 		% 123 is the erld magic number to indicate a clean exit requested from the init script
-		shutdown = remote(Node, CookieModule, init, stop, [123])
+		ok = remote(Node, CookieModule, init, stop, [123])
 	catch
 		_:_ -> erlang:halt(1)
 	end,

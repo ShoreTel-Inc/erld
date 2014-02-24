@@ -95,8 +95,6 @@ waitstop() {
 	fi
 }
 
-# start and stop the elvis_tftp erlang system
-
 test -x $START || exit 0
 
 start() {
@@ -129,7 +127,7 @@ stop() {
 	if [ -r $PIDFILE ]; then
 		echo -n "Stopping the $DESC server "
 		pid=`cat $PIDFILE`
-		$ERL -name $TMPNODE -eval "erld_remote:stop(\"elvis\", erldapp)."
+		$ERL -name $TMPNODE -eval "erld_remote:stop(\"$NAME\", erldapp)."
 		if [ $? ] ; then
 			waitstop $pid
 			rm -f $LOCKFILE
