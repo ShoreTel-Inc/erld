@@ -90,7 +90,7 @@ waitstop() {
 	echo -n ') '
 	# If it didn't shut down nicely, we get nasty
 	if [ "$dead" -eq "0" ]; then
-		echo "WARNING: Failed to gracefully shut down erldapp node.  Resorting to killing it harshly."
+		echo -e "\nWARNING: Failed to gracefully shut down erldapp node.  Resorting to killing it harshly."
 		kill -9 $pid
 	fi
 }
@@ -126,21 +126,21 @@ bake_cookie() {
 
 stop() {
 	checkroot
-	echo -n "Stopping the $DESC server "
 	if [ -r $PIDFILE ]; then
+		echo -n "Stopping the $DESC server "
 		pid=`cat $PIDFILE`
 		$ERL -name $TMPNODE -eval "erld_remote:stop(\"elvis\", erldapp)."
 		if [ $? ] ; then
 			waitstop $pid
 			rm -f $LOCKFILE
+			rm -f $PIDFILE
 			success
 		else
 			failure
 		fi
 
 	else
-		echo -n "(no pid file) "
-		failure
+		echo "$DESC already stopped"
 	fi
 }
 
