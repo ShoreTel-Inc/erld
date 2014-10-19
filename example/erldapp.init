@@ -119,7 +119,7 @@ bake_cookie() {
 	chown root $COOKIE_FILE
 	chmod o= $COOKIE_FILE
 	chmod g=r $COOKIE_FILE
-	$ERL -noshell -eval "io:fwrite(\"~s\", [erldapp:bake_cookie()])." -s init stop > $COOKIE_FILE
+	$ERL -boot $ERL_BOOT -noshell -eval "io:fwrite(\"~s\", [erldapp:bake_cookie()])." -s init stop > $COOKIE_FILE
 }
 
 stop() {
