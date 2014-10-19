@@ -37,6 +37,9 @@
 
 % Standard app start function
 start(_, _) ->
+	% Set up our cookie to match the one erld expects
+	erlang:set_cookie(node(), bake_cookie()),
+
 	% Do your normal application startup here - if any of this fails, erld will exit
 	% to the console with an error code
 	{ok, AppPid} = supervisor:start_link({local, erldapp_sup}, ?MODULE, []),
