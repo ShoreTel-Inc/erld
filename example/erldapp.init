@@ -24,6 +24,9 @@
 # A sample init script for managing an erld application
 #
 
+# Uncomment and edit this if you're running from an environment that doesn't have HOME set (such as during boot):
+# HOME=/home/somedir
+
 NAME=erldapp
 DESC="My erld app"
 ERLD="/usr/local/bin/erld"
