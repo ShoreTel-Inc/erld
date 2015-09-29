@@ -1,0 +1,3 @@
+[submodule "erld_erlang_app"]
+	path = erld_erlang_app
+	url = https://github.com/vesperusiak/erld_erlang_app.git
