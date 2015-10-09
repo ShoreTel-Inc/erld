@@ -28,7 +28,6 @@ AC_SUBST([ERLCFLAGS], [$erlcflags])
 AC_CONFIG_FILES([ \
 					  Makefile \
 					  c_src/Makefile \
-					  src/Makefile \
 					  ])
 
 AC_OUTPUT
