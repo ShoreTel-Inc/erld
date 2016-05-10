@@ -26,9 +26,11 @@ AC_SUBST([ERLCFLAGS], [$erlcflags])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CONFIG_FILES([ \
-					  Makefile \
-					  c_src/Makefile \
-					  ])
+                 Makefile \
+                 c_src/Makefile \
+                 erld_erlang_app/Makefile \
+                 example/Makefile \
+                 ])
 
 AC_OUTPUT
 echo
