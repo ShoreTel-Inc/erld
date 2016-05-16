@@ -30,12 +30,12 @@
 NAME=erldapp
 DESC="My erld app"
 ERLD="/usr/local/bin/erld"
-ERLD_LOG="/var/log/erldapp/erld.log"
+ERLD_LOG="/var/log/$NAME/erld.log"
 ERL="/usr/lib/erlang/bin/erl +Ktrue +B -noinput"
-ERL_CONFIG="/etc/erldapp/erld-sys"
-ERL_BOOT="/usr/lib/erlang/lib/erldapp-1.1.1/ebin/erldapp"
-COOKIE_FILE="/etc/erldapp/cookie"
-NODE="erldapp"
+ERL_CONFIG="/etc/$NAME/erld-sys"
+ERL_BOOT="/usr/lib/erlang/lib/$NAME-1.1.1/ebin/$NAME"
+COOKIE_FILE="/etc/$NAME/cookie"
+NODE="$NAME"
 TMPNODE="$NODE-tmp"
 FULLNODE="'$NODE@`hostname -f`'"
 TIMEOUT=60 # Wait for one minute for the app to come up
@@ -47,6 +47,7 @@ RESTART_INTERVAL=1200 # erld restart interval (time that's considered a "quick" 
 PIDFILE=/var/run/$NAME.pid
 LOCKDIR=/var/lock
 LOCKFILE=$LOCKDIR/$NAME
+COOKIE_MOD=$NAME
 
 # This module:function will be called when erld receives a SIGHUP
 ROTATION_MODULE=erld_logger 
@@ -93,7 +94,7 @@ waitstop() {
 	echo -n ') '
 	# If it didn't shut down nicely, we get nasty
 	if [ "$dead" -eq "0" ]; then
-		echo -e "\nWARNING: Failed to gracefully shut down erldapp node.  Resorting to killing it harshly."
+		echo -e "\nWARNING: Failed to gracefully shut down $NAME node.  Resorting to killing it harshly."
 		kill -9 $pid
 	fi
 }
@@ -122,7 +123,7 @@ bake_cookie() {
 	chown root $COOKIE_FILE
 	chmod o= $COOKIE_FILE
 	chmod g=r $COOKIE_FILE
-	$ERL -boot start_clean -noshell -eval "io:fwrite(\"~s\", [erldapp:bake_cookie()])." -s init stop > $COOKIE_FILE
+	$ERL -boot start_clean -noshell -eval "io:fwrite(\"~s\", [$COOKIE_MOD:bake_cookie()])." -s init stop > $COOKIE_FILE
 }
 
 stop() {
@@ -130,7 +131,7 @@ stop() {
 	if [ -r $PIDFILE ]; then
 		echo -n "Stopping the $DESC server "
 		pid=`cat $PIDFILE`
-		$ERL -name $TMPNODE -eval "erld_remote:stop(\"$NAME\", erldapp)."
+		$ERL -name $TMPNODE -eval "erld_remote:stop(\"$NAME\", $COOKIE_MOD)."
 		if [ "$?" -eq "0" ] ; then
 			waitstop $pid
 			rm -f $LOCKFILE
@@ -226,7 +227,7 @@ case "$1" in
    show
 	;;
   *)
-	echo "Usage: /etc/init.d/erldapp {start|stop|restart|condrestart|condstop|show|status}"
+	echo "Usage: $0 {start|stop|restart|condrestart|condstop|show|status}"
 	exit 1
 esac
 

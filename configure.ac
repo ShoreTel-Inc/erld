@@ -1,4 +1,4 @@
-AC_INIT(UNIX daemon wrapper for Erlang, 1.0, bernie@m5.net, erld)
+AC_INIT(UNIX daemon wrapper for Erlang, 1.0.1, bernie@m5.net, erld)
 AC_PREREQ(2.59c)
 AC_COPYRIGHT(Copyright (C) 2012 ShoreTel Inc.)
 
