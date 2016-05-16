@@ -487,7 +487,9 @@ pid_t fork_exec_erl(char *const argv[], int listen_sock, int epmd_sock, int *m_p
 	close(*m_pty);
 
 	/* Chdir to "/" so that we don't hold a the current directory open */
-	CHECK(chdir("/"));
+	// I'm removing this for the moment because it loses CWD data set in the
+	// init script which can be required in certain setups.
+	//CHECK(chdir("/"));
 
 	/* Start the Unix pty dance... */
 	setsid();
